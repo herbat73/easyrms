@@ -27,6 +27,25 @@ describe("isDevResetAvailable", () => {
   });
 });
 
+describe("isDevResetAvailable with EASYRMS_RESET_TEST_DATA", () => {
+  it.each([
+    ["production", "postgres://u:p@db.example.com:5432/easyrms"],
+    ["test", undefined],
+    [undefined, undefined],
+    ["development", "postgres://u:p@db.example.com:5432/easyrms"],
+  ])("is true for %s with %s when the flag is `true`", (nodeEnv, databaseUrl) => {
+    expect(isDevResetAvailable({ nodeEnv, databaseUrl, flag: "true" })).toBe(true);
+  });
+
+  it.each(["", "TRUE", "1", "false", undefined])("does not open production for the flag value %s", (flag) => {
+    expect(isDevResetAvailable({ nodeEnv: "production", databaseUrl: undefined, flag })).toBe(false);
+  });
+
+  it("keeps the development default when the flag is unset", () => {
+    expect(isDevResetAvailable({ nodeEnv: "development", databaseUrl: undefined, flag: undefined })).toBe(true);
+  });
+});
+
 function deps(overrides: Partial<DevResetDeps> = {}): DevResetDeps {
   return {
     devResetPort: { truncateAll: vi.fn(async () => ["agents", "suppliers"]) },
