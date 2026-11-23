@@ -1,6 +1,6 @@
 # Execution plan: preload-test-data
 
-Source doc: .ai/specs/2026-11-23-preload-test-data-flag.md (spec PR #180; the spec file is not committed on this branch)
+Source doc: .ai/specs/implemented/2026-11-23-preload-test-data-flag.md (spec PR #180)
 Issue: #179
 
 ## Goal
