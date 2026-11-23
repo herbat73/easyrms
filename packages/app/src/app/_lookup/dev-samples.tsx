@@ -1,23 +1,31 @@
+import { connection } from "next/server";
 import type { ReactElement } from "react";
 import { listFakeOrderSamples, selectOrderSource } from "@easyrms/core";
 
-/** Whether the fake order source is active outside production; the only case where sample credentials are shown. */
-function fakeSourceActive(): boolean {
-  if (process.env.NODE_ENV === "production") return false;
+import { showTestData } from "./test-data-visibility";
+
+/** Resolves the active order source for display only; `allowFakeInProduction` never changes which source serves orders. */
+function activeOrderSource(): string | undefined {
   try {
-    return selectOrderSource({ nodeEnv: process.env.NODE_ENV, source: process.env.EASYRMS_ORDER_SOURCE }) === "fake";
+    return selectOrderSource({
+      nodeEnv: process.env.NODE_ENV,
+      source: process.env.EASYRMS_ORDER_SOURCE,
+      allowFakeInProduction: true,
+    });
   } catch {
-    return false;
+    return undefined;
   }
 }
 
-/** Server Component: lists the seeded example customers and orders so flows can be verified in development. */
-export function DevSamples(): ReactElement | null {
-  if (!fakeSourceActive()) return null;
+/** Server Component: lists the seeded example customers and orders when `EASYRMS_PRELOAD_TEST_DATA=true` (any environment). */
+export async function DevSamples(): Promise<ReactElement | null> {
+  // Opts the page into request-time rendering: otherwise `/` is prerendered at build and the flag is frozen then.
+  await connection();
+  if (!showTestData({ flag: process.env.EASYRMS_PRELOAD_TEST_DATA, orderSource: activeOrderSource() })) return null;
   return (
     <section aria-labelledby="dev-samples-title" className="space-y-3 rounded-md border border-dashed border-warning-subtle-border bg-warning-subtle text-warning-subtle-foreground p-4 text-sm">
       <h2 id="dev-samples-title" className="font-semibold">
-        Dane testowe (tylko środowisko deweloperskie)
+        Dane testowe
       </h2>
       <ul className="space-y-3">
         {listFakeOrderSamples().map((sample) => (
