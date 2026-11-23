@@ -44,7 +44,7 @@ services:
       - easyrms-docker-network
 
   easyrms_webapp:
-    image: easyrms:latest
+    image: herbat73/easyrms:latest
     restart: always
     container_name: easyrms_webapp
     ports:
@@ -54,10 +54,15 @@ services:
       EASYRMS_DATABASE_URL: postgres://easyrms:easyrms@postgres:5432/easyrms
       EASYRMS_CLAMAV_HOST: clamav
       NODE_ENV: production
-      EASYRMS_ALLOW_FAKE_ORDERS_IN_PRODUCTION: true
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     networks:
       - easyrms-docker-network
 
