@@ -14,6 +14,8 @@ Public-password admin can be seeded into production (spec Q4, needs human confir
 
 ## Progress
 
+PR: #188
+
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
 
 ### Phase 1: Seed in any environment
@@ -21,4 +23,4 @@ Public-password admin can be seeded into production (spec Q4, needs human confir
 - [x] 1.1 dev-seed.ts guard, SeedDataPresentError and tests — 12b768e
 - [x] 1.2 seed-dev.ts script: drop early production throw, warn in production — 12b768e
 - [x] 1.3 Docs: Configuration.md, GettingStarted.md, README, header comments — 12b768e
-- [ ] 1.4 Full validation gate
+- [x] 1.4 Full validation gate
