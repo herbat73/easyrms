@@ -1,6 +1,7 @@
 # Local PostgreSQL for development when native PostgreSQL binaries are not installed (e.g. Windows).
 # Matches DEFAULT_DATABASE_URL in packages/db/src/config.ts; `npm run setup` starts it automatically.
 services:
+  
   postgres:
     image: postgres:18.7
     container_name: easyrms-postgres
@@ -39,6 +40,24 @@ services:
       timeout: 10s
       retries: 20
       start_period: 120s
+    networks:
+      - easyrms-docker-network
+
+  easyrms_webapp:
+    image: easyrms:latest
+    restart: always
+    container_name: easyrms_webapp
+    ports:
+      - 3000:3000
+    env_file: .env
+    environment:
+      EASYRMS_DATABASE_URL: postgres://easyrms:easyrms@postgres:5432/easyrms
+      EASYRMS_CLAMAV_HOST: clamav
+      NODE_ENV: production
+      EASYRMS_ALLOW_FAKE_ORDERS_IN_PRODUCTION: true
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - easyrms-docker-network
 
