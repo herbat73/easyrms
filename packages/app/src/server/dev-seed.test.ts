@@ -1,7 +1,7 @@
 import { hashInviteToken, type AgentCredentials, type AgentStatus, type NewSupplier, type Supplier } from "@easyrms/core";
 import { describe, expect, it, vi } from "vitest";
 
-import { DEV_SEED_ADMIN, DEV_SEED_SUPPLIERS, DevSeedRefusedError, seedDevData, type DevSeedDeps } from "./dev-seed";
+import { DEV_SEED_ADMIN, DEV_SEED_SUPPLIERS, SeedDataPresentError, seedDevData, type DevSeedDeps } from "./dev-seed";
 
 const NOW = new Date("2026-11-16T12:00:00Z");
 
@@ -41,6 +41,7 @@ function fakes(initial: { suppliers?: Supplier[]; agentEmail?: string; agentStat
       }),
     },
     agentRepository: {
+      list: async () => [...state.agents.keys()].map((email) => ({ email }) as never),
       findCredentialsByEmail: async (email) => (state.agents.has(email) ? ({ email, status: state.agents.get(email) } as AgentCredentials) : null),
       consumeInvite: vi.fn(async (tokenHash: string) => {
         const email = tokens.get(tokenHash);
@@ -118,16 +119,39 @@ describe("seedDevData", () => {
     expect(deps.supplierService.create).toHaveBeenCalledTimes(1);
   });
 
-  it("refuses in production before touching anything", async () => {
-    const { deps } = fakes();
+  it("seeds an empty production database", async () => {
+    const { deps, state } = fakes();
 
-    await expect(seedDevData({ ...deps, nodeEnv: "production" })).rejects.toBeInstanceOf(DevSeedRefusedError);
+    await expect(seedDevData({ ...deps, nodeEnv: "production" })).resolves.toMatchObject({ adminCreated: true });
+
+    expect(state.suppliers).toHaveLength(2);
+  });
+
+  it("refuses production when a supplier exists, before writing anything", async () => {
+    const { deps } = fakes({ suppliers: [supplier("Acme", 1)] });
+
+    await expect(seedDevData({ ...deps, nodeEnv: "production" })).rejects.toBeInstanceOf(SeedDataPresentError);
 
     expect(deps.supplierService.create).not.toHaveBeenCalled();
     expect(deps.agentService.invite).not.toHaveBeenCalled();
   });
 
-  it("seeds under test and with NODE_ENV unset (only production is refused)", async () => {
+  it("refuses production when an agent exists, before writing anything", async () => {
+    const { deps } = fakes({ agentEmail: "someone@example.com" });
+
+    await expect(seedDevData({ ...deps, nodeEnv: "production" })).rejects.toBeInstanceOf(SeedDataPresentError);
+
+    expect(deps.supplierService.create).not.toHaveBeenCalled();
+    expect(deps.agentService.invite).not.toHaveBeenCalled();
+  });
+
+  it("rerun in development on a seeded database still works", async () => {
+    const { deps } = fakes();
+    await seedDevData(deps);
+    await expect(seedDevData({ ...deps, nodeEnv: "development" })).resolves.toMatchObject({ adminCreated: false });
+  });
+
+  it("seeds under test and with NODE_ENV unset (no production guard)", async () => {
     for (const nodeEnv of ["test", undefined]) {
       const { deps } = fakes();
       await expect(seedDevData({ ...deps, nodeEnv })).resolves.toMatchObject({ adminCreated: true });

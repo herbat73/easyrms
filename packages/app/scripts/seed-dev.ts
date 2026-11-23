@@ -3,8 +3,8 @@
  *
  *   npm run seed:dev
  *
- * Safe to rerun: what already exists is left as it is. Refuses when `NODE_ENV` is `production`: the admin's password is
- * public (see `src/server/dev-seed.ts`). `npm run setup` runs it once for a fresh checkout. Like `agent-create.ts` it
+ * Safe to rerun: what already exists is left as it is. Runs in every environment; when `NODE_ENV` is `production` it
+ * seeds only a database with no agents and no suppliers (the admin's password is public, see `src/server/dev-seed.ts`). `npm run setup` runs it once for a fresh checkout. Like `agent-create.ts` it
  * cannot import `src/server/container.ts` (that file imports `server-only`), so it builds a small container.
  */
 import { asValue, createContainer, InjectionMode } from "awilix";
@@ -22,11 +22,12 @@ import {
 } from "@easyrms/core";
 import { getOrm, registerDb } from "@easyrms/db";
 
-import { DEV_SEED_ADMIN, DevSeedRefusedError, seedDevData } from "../src/server/dev-seed";
+import { DEV_SEED_ADMIN, seedDevData } from "../src/server/dev-seed";
 
 async function main(): Promise<number> {
-  // Fail before opening a database connection.
-  if (process.env.NODE_ENV === "production") throw new DevSeedRefusedError();
+  if (process.env.NODE_ENV === "production") {
+    console.warn("⚠ NODE_ENV is production: seeding only an empty database; the seeded admin has a PUBLIC password, change it before real use.");
+  }
 
   const logger = {
     info: (message: string, context?: Record<string, unknown>) => console.info(message, context),

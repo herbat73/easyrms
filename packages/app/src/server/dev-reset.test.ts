@@ -54,7 +54,7 @@ function deps(overrides: Partial<DevResetDeps> = {}): DevResetDeps {
     seed: {
       supplierService: { list: async () => [], create: vi.fn(async (input) => ({ ...input, id: 1 }) as never) },
       agentService: { invite: vi.fn(async () => ({ agent: { id: 1 } as never, inviteToken: "t" })) },
-      agentRepository: { findCredentialsByEmail: async () => null, consumeInvite: vi.fn(async () => ({ id: 1 }) as never) },
+      agentRepository: { list: async () => [], findCredentialsByEmail: async () => null, consumeInvite: vi.fn(async () => ({ id: 1 }) as never) },
       passwordHasher: { hash: async () => "h", verify: async () => true, needsRehash: () => false },
       clock: () => new Date("2026-11-19T12:00:00Z"),
       nodeEnv: "development",

@@ -1,8 +1,9 @@
 /**
  * Dev-environment seed data (issue #156): two suppliers and one initial administrator, so a fresh checkout can try the
  * supplier-claim flow without inviting an agent and adding vendors by hand. The data is public on purpose (it is in the
- * repository), which is why this file must only ever seed a local development database: `seedDevData` refuses when
- * `NODE_ENV` is `production`, and `npm run setup` seeds only the default local database.
+ * repository). It runs in every environment (issue #186), but when `NODE_ENV` is `production` `seedDevData` seeds only
+ * a database that holds no agent and no supplier, and refuses otherwise; `npm run setup` seeds only the default local
+ * database.
  *
  * Idempotent and non-destructive: an existing supplier (same name, case-insensitive) and an `active` or `disabled` agent
  * with the admin's e-mail are left exactly as they are, so a rerun never resets a password a developer changed or
@@ -36,7 +37,7 @@ export const DEV_SEED_ADMIN = {
 export interface DevSeedDeps {
   supplierService: { list(): Promise<Supplier[]>; create(input: NewSupplier): Promise<Supplier> };
   agentService: { invite(input: AgentInviteInput): Promise<InviteOutcome> };
-  agentRepository: Pick<AgentRepository, "findCredentialsByEmail" | "consumeInvite">;
+  agentRepository: Pick<AgentRepository, "findCredentialsByEmail" | "consumeInvite" | "list">;
   passwordHasher: PasswordHasher;
   clock: () => Date;
   nodeEnv: string | undefined;
@@ -48,20 +49,24 @@ export interface DevSeedResult {
   adminCreated: boolean;
 }
 
-/** Thrown when the seeder is pointed at a production process; never caught by the seeder itself. */
-export class DevSeedRefusedError extends Error {
+/** Thrown when a production process already holds agents or suppliers; never caught by the seeder itself. */
+export class SeedDataPresentError extends Error {
   constructor() {
-    super("Refusing to seed: NODE_ENV is production. The dev seed data has a public password and is for local development only.");
-    this.name = "DevSeedRefusedError";
+    super("Refusing to seed: NODE_ENV is production and the database already holds agents or suppliers. Seeding is allowed in production only on an empty database.");
+    this.name = "SeedDataPresentError";
   }
 }
 
 export async function seedDevData(deps: DevSeedDeps): Promise<DevSeedResult> {
-  if (deps.nodeEnv === "production") throw new DevSeedRefusedError();
-
   const result: DevSeedResult = { suppliersCreated: [], suppliersKept: [], adminCreated: false };
 
-  const existingNames = new Set((await deps.supplierService.list()).map((supplier) => supplier.name.toLowerCase()));
+  const existingSuppliers = await deps.supplierService.list();
+  // Production: the public-password admin may only go into a database nobody has used yet (issue #186).
+  if (deps.nodeEnv === "production" && (existingSuppliers.length > 0 || (await deps.agentRepository.list()).length > 0)) {
+    throw new SeedDataPresentError();
+  }
+
+  const existingNames = new Set(existingSuppliers.map((supplier) => supplier.name.toLowerCase()));
   for (const supplier of DEV_SEED_SUPPLIERS) {
     if (existingNames.has(supplier.name.toLowerCase())) {
       result.suppliersKept.push(supplier.name);
