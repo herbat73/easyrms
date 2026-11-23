@@ -18,7 +18,7 @@ Public-password admin can be seeded into production (spec Q4, needs human confir
 
 ### Phase 1: Seed in any environment
 
-- [ ] 1.1 dev-seed.ts guard, SeedDataPresentError and tests
-- [ ] 1.2 seed-dev.ts script: drop early production throw, warn in production
-- [ ] 1.3 Docs: Configuration.md, GettingStarted.md, README, header comments
+- [x] 1.1 dev-seed.ts guard, SeedDataPresentError and tests — 12b768e
+- [x] 1.2 seed-dev.ts script: drop early production throw, warn in production — 12b768e
+- [x] 1.3 Docs: Configuration.md, GettingStarted.md, README, header comments — 12b768e
 - [ ] 1.4 Full validation gate
