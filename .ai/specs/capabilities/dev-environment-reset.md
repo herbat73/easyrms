@@ -13,7 +13,7 @@ The system SHALL show the "Resetuj bazę" button in the admin header only when `
 - WHEN a signed-in agent with `MANAGE_RULES` opens any admin page under `next dev` against the default local database
 - THEN the button is the first item at the left of the header
 
-Source: .ai/specs/2026-11-19-dev-db-reset.md
+Source: .ai/specs/implemented/2026-11-19-dev-db-reset.md
 
 ## Requirement: Reset needs confirmation and permission
 The system SHALL run the reset only after the agent confirms "Czy chcesz zresetować bazę do pierwotnego stanu developerskiego?" and only for an agent with `MANAGE_RULES`.
@@ -26,7 +26,7 @@ The system SHALL run the reset only after the agent confirms "Czy chcesz zreseto
 - WHEN an agent without `MANAGE_RULES` (or no agent, or a request without the CSRF header) calls `POST /api/dev/reset`
 - THEN the answer is 403 (401 without a session, 403 `csrf_rejected` for CSRF) and the data is unchanged
 
-Source: .ai/specs/2026-11-19-dev-db-reset.md
+Source: .ai/specs/implemented/2026-11-19-dev-db-reset.md
 
 ## Requirement: Reset restores the seeded dev state
 The system SHALL, on a confirmed reset, delete all rows of every application table and then seed the dev suppliers and the dev admin exactly as `npm run seed:dev` does, and SHALL send the agent to the login page.
@@ -39,4 +39,4 @@ The system SHALL, on a confirmed reset, delete all rows of every application tab
 - WHEN the truncate succeeds and the seed throws
 - THEN the answer is 500 with a message to run `npm run seed:dev`, and the failure is logged with no secret in it
 
-Source: .ai/specs/2026-11-19-dev-db-reset.md
+Source: .ai/specs/implemented/2026-11-19-dev-db-reset.md
