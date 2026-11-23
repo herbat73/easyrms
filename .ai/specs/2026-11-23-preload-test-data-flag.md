@@ -12,7 +12,7 @@ The customer lookup page (`/`) shows a "Dane testowe" panel with the sample cust
 - Alternatives rejected: reusing `EASYRMS_ALLOW_FAKE_ORDERS_IN_PRODUCTION` (a different concern: it relaxes a safety check, it does not choose what the UI shows); also unlocking the admin login link and the dev reset button (see assumptions).
 
 ## 📝 Architecture
-- `core`: new pure `shouldShowTestData({ flag, source })`-style decision is not needed in `core`; the decision stays in `app`. `selectOrderSource` is unchanged.
+- `core`: unchanged (`selectOrderSource` stays as is); the display decision lives in `app`.
 - `app`: `_lookup/dev-samples.tsx` replaces `fakeSourceActive()` (which returns false in production) with a helper in a new `_lookup/test-data-visibility.ts` (same shape as `admin-login-visibility.ts`): `showTestData({ flag, orderSource })` → `flag === "true" && orderSource === "fake"`. The component resolves the source with `selectOrderSource({ nodeEnv, source, allowFakeInProduction: true })` inside try/catch (an invalid source hides the panel; the real request path still reports the configuration error). `allowFakeInProduction: true` is passed only for this display decision; it never changes which source serves orders (`container.ts` keeps its own check).
 - Unchanged: `db`, API routes, DI, the admin login link, the dev reset button, `EASYRMS_ORDER_SOURCE` rules.
 
@@ -44,5 +44,5 @@ Single phase; the flag, the visibility rule and the docs ship together.
 Phase 1 (each step leaves the app working):
 1. **app** `_lookup/test-data-visibility.ts` with `showTestData` and `test-data-visibility.test.ts`: flag `true` + `fake` → true; flag unset/`false`/`TRUE`/blank → false; source other than `fake` → false.
 2. **app** `dev-samples.tsx` uses it (read `process.env.EASYRMS_PRELOAD_TEST_DATA`, `EASYRMS_ORDER_SOURCE`), drops the `NODE_ENV` check, heading text "Dane testowe".
-3. **docs** `Configuration.md`: new row (default unset, strict `true`, exposes sample data, needs the fake source); fix the `EASYRMS_ALLOW_FAKE_ORDERS_IN_PRODUCTION` row (it no longer says the panel stays off); `GettingStarted.md` and the setup script/`.env` hint: set `EASYRMS_PRELOAD_TEST_DATA=true` for local development. Grep `.ai/qa` scenarios for "Dane testowe" and set the flag in the test-env script if any depends on the panel.
+3. **docs** `Configuration.md`: new row (default unset, strict `true`, exposes sample data, needs the fake source); fix the `EASYRMS_ALLOW_FAKE_ORDERS_IN_PRODUCTION` row (it no longer says the panel stays off); `GettingStarted.md` and `.env.example` (which mentions the panel): set `EASYRMS_PRELOAD_TEST_DATA=true` for local development. Grep `.ai/qa` scenarios for "Dane testowe" and set the flag in the test-env script if any depends on the panel.
 4. Run the gate: `lint`, `typecheck`, `test`, `audit`, `docs:check`, `storybook:build`.
