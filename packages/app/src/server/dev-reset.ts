@@ -13,8 +13,13 @@ import { seedDevData, type DevSeedDeps, type DevSeedResult } from "./dev-seed";
 const DEFAULT_LOCAL_URL = "postgres://easyrms:easyrms@localhost:5432/easyrms";
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
-/** True only for a development process whose database host is a loopback address. Anything unparsable is "no". */
-export function isDevResetAvailable(input: { nodeEnv: string | undefined; databaseUrl: string | undefined }): boolean {
+/**
+ * True when the operator opted in with `EASYRMS_RESET_TEST_DATA=true` (issue #183, any environment, any database; exactly
+ * `true`, like `EASYRMS_PRELOAD_TEST_DATA`), or, without the flag, for a development process whose database host is a
+ * loopback address. Anything unparsable is "no".
+ */
+export function isDevResetAvailable(input: { nodeEnv: string | undefined; databaseUrl: string | undefined; flag?: string | undefined }): boolean {
+  if (input.flag === "true") return true;
   if (input.nodeEnv !== "development") return false;
   try {
     return LOOPBACK_HOSTS.has(new URL(input.databaseUrl?.trim() || DEFAULT_LOCAL_URL).hostname.toLowerCase());
@@ -25,7 +30,11 @@ export function isDevResetAvailable(input: { nodeEnv: string | undefined; databa
 
 /** `isDevResetAvailable` for the running process. */
 export function isDevResetAvailableHere(): boolean {
-  return isDevResetAvailable({ nodeEnv: process.env.NODE_ENV, databaseUrl: process.env.EASYRMS_DATABASE_URL });
+  return isDevResetAvailable({
+    nodeEnv: process.env.NODE_ENV,
+    databaseUrl: process.env.EASYRMS_DATABASE_URL,
+    flag: process.env.EASYRMS_RESET_TEST_DATA,
+  });
 }
 
 export interface DevResetDeps {
