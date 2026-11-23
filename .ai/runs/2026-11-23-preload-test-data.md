@@ -15,10 +15,10 @@ Flag on in production lists public sample data; documented. Developers lose the 
 
 ## Progress
 
-> Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
+> Convention: `- [x]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles.
 
 ### Phase 1: Flag, panel and docs
 
-- [ ] 1.1 app: showTestData helper and tests
-- [ ] 1.2 app: DevSamples uses the flag
-- [ ] 1.3 docs: Configuration, GettingStarted, .env.example, QA scripts
+- [x] 1.1 app: showTestData helper and tests
+- [x] 1.2 app: DevSamples uses the flag
+- [x] 1.3 docs: Configuration, GettingStarted, .env.example, QA scripts
