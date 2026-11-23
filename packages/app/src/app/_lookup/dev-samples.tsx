@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import type { ReactElement } from "react";
 import { listFakeOrderSamples, selectOrderSource } from "@easyrms/core";
 
@@ -17,7 +18,9 @@ function activeOrderSource(): string | undefined {
 }
 
 /** Server Component: lists the seeded example customers and orders when `EASYRMS_PRELOAD_TEST_DATA=true` (any environment). */
-export function DevSamples(): ReactElement | null {
+export async function DevSamples(): Promise<ReactElement | null> {
+  // Opts the page into request-time rendering: otherwise `/` is prerendered at build and the flag is frozen then.
+  await connection();
   if (!showTestData({ flag: process.env.EASYRMS_PRELOAD_TEST_DATA, orderSource: activeOrderSource() })) return null;
   return (
     <section aria-labelledby="dev-samples-title" className="space-y-3 rounded-md border border-dashed border-warning-subtle-border bg-warning-subtle text-warning-subtle-foreground p-4 text-sm">
