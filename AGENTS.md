@@ -46,7 +46,8 @@ with them, stop and ask.
 ## Commands (run from the repo root)
 
 - `npm run dev | build | start | lint | typecheck | test | audit | docs:check | storybook | storybook:build`
-- Gate: `lint`, `typecheck`, `test`, `audit`, `docs:check`, `storybook:build`.
+- Gate (the list in `.ai/agentic.config.json` `validation.commands`, in this order): `typecheck`, `test`, `lint`,
+  `audit`, `docs:check`, `storybook:build`, `NODE_ENV=production npm run build`.
 - `NODE_ENV=production npm run build` (with `NODE_ENV=development` the prerender of `/_global-error` fails).
 - Database: `npm run db:start`, `db:migrate`, `db:migration:create`; `npm run test:db` needs the database and is outside
   the gate. First agent login: `npm run agent:create`. `npm run setup` bootstraps a fresh checkout.
@@ -74,5 +75,5 @@ Read only the row that matches the task; add more rows' files when the task span
 | Integration / E2E test (agent-browser scenario) | `.ai/skills/om-integration-tests/SKILL.md`, `doc/best-practices-testow-integracyjnych.md`, a scenario in `.ai/qa/RET/` as a model |
 | Setup, configuration, env vars, deployment | `GettingStarted.md` (setup), `Configuration.md` (env vars) |
 
-No dedicated doc exists yet for: the customer-portal (Tailwind) page patterns, and a CI pipeline (there is no
-`.github/`).
+No dedicated doc exists yet for: the customer-portal (Tailwind) page patterns, and a CI pipeline
+(`.github/workflows/` only builds and pushes the Docker image on a release; nothing runs the gate in CI).

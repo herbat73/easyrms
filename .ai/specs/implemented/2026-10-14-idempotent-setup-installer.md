@@ -3,6 +3,8 @@
 ## 📝 TLDR
 A developer cloning EasyRMS today runs four separate commands from the README (`npm install`, `npm run db:start`, `npm run db:migrate`, `npm run dev`) and gets a runtime error if one is missed. This spec proposes a single zero-dependency Node script, `npm run setup`, that performs the install, database and migration steps, skips whatever is already done, and can be re-run safely. The manual steps stay in the README as the alternative. (Implemented; tracked by issue #3. Status as of 2026-10-23: shipped in `scripts/setup.mjs` and the root `setup` script; the Docker Compose fallback is described in the 2026-10-18 amendment.)
 
+> **Update 2026-11-25:** `scripts/setup.mjs` later gained a "seed dev data" step (issue #156), which seeds only the default local database, so seeding is no longer a non-goal. Native Windows works through the Docker Compose fallback (2026-10-18 amendment), which supersedes Q3 below. Current behavior: `GettingStarted.md`.
+
 ## 📝 Problem Statement
 Who: a developer setting up EasyRMS locally for the first time (or after a long break).
 

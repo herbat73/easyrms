@@ -87,7 +87,7 @@ the smaller, more explicit change.
 
 Apply as the relevant feature appears.
 
-- **Now:** no raw SQL concatenation (MikroORM APIs only; the only raw statements are parameterised and inside `db`: `nextval('return_rma_seq')`, `pg_advisory_xact_lock(hashtext(?))` in `withOrderLock`, and migrations); never spread a raw request body into
+- **Now:** no raw SQL concatenation (MikroORM APIs only; raw statements live only in `db` and are parameterised: sequences and advisory locks (`nextval('return_rma_seq')`, `pg_advisory_xact_lock` in `withOrderLock`, the evidence quota and the dev reset), the shared throttle's atomic upserts (`PostgresRateLimiter`), bulk updates MikroORM has no API for (agent session epoch, evidence attach and purge, retention anonymization), and migrations; the one statement built from identifiers is the dev reset's `TRUNCATE`, whose table list is read from the Postgres catalog, never from input); never spread a raw request body into
   `em.create()`/`em.assign()` — go through the parsed Zod output; no secrets, tokens or passwords in logs,
   responses or commits; secrets only via env (documented in README); `npm run audit` (high+, expiring allowlist in `audit-allowlist.json`) must pass.
 - **(when auth exists)** bcrypt/bcryptjs cost ≥ 12 (upgrade path argon2id); agent passwords use dependency-free `node:crypto` scrypt (N=2^16, r=8, p=2, parameters stored in the hash) as accepted by the agent login spec; JWT HS256+ with ≥ 32-byte env secret

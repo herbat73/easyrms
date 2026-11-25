@@ -1,5 +1,7 @@
 # Reset the dev database from the admin header
 
+> **Update 2026-11-25:** since issue #183 (PR #184), `EASYRMS_RESET_TEST_DATA=true` also enables the reset in any environment and on any database (`packages/app/src/server/dev-reset.ts`). Q3 and the requirement below describe the default without that flag; the current rule is in `.ai/specs/capabilities/dev-environment-reset.md` and `Configuration.md`.
+
 Refs: issue #174; dev seed data `.ai/specs/implemented/` (PR #157, issue #156, `packages/app/src/server/dev-seed.ts`).
 
 ## 📝 TLDR

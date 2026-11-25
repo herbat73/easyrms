@@ -4,7 +4,7 @@ The surfaces below are protected contracts. `om-code-review` checks changes agai
 
 ## 1. HTTP API (`packages/app/src/app/api/**`)
 
-Surface: routes (today `/api/returns`, `/api/health`), methods, request shapes (Zod schemas in `packages/core/src/validators/`), and the response envelope `{ ok: true, data } | { ok: false, error: { code, message, fieldErrors? } }`.
+Surface: routes (every `route.ts` under `packages/app/src/app/api/`: returns, evidence, agents, suppliers, supplier-claims, rules, discovery, dev, health), methods, request shapes (Zod schemas in `packages/core/src/validators/`), and the response envelope `{ ok: true, data } | { ok: false, error: { code, message, fieldErrors? } }`.
 
 - **Breaking:** removing/renaming a route or method; removing or renaming a response field; tightening a request schema (new required field, narrower type); changing an error `code` or HTTP status mapping; changing the envelope shape.
 - **Non-breaking:** adding an optional request field, adding a response field, adding a route.

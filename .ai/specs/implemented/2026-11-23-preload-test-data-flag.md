@@ -32,7 +32,7 @@ Low. No schema or API change. The one exposure: with the flag on in production t
 | # | Question | Chosen answer | Why |
 |---|---|---|---|
 | Q1 | "Test users" = which UI? | The "Dane testowe" sample-orders panel on `/` | It is the only place listing test users/orders; smallest scope |
-| Q2 | Should the flag also control the admin login shortcut and dev reset button? | No, they keep their current `NODE_ENV` rules | The reset button is destructive and also guarded by a local-DB check; widening it is out of the ask |
+| Q2 | Should the flag also control the admin login shortcut and dev reset button? | No, they keep their current `NODE_ENV` rules (later changed for the reset button by issue #183: `EASYRMS_RESET_TEST_DATA`) | The reset button is destructive and also guarded by a local-DB check; widening it is out of the ask |
 | Q3 | Default in development? | Off; the dev panel needs the flag too | The issue says to remove the current rule; `.env` documents the flag |
 | Q4 | Which name? | `EASYRMS_PRELOAD_TEST_DATA` (issue body) | Title and body disagree; body is explicit twice. ⚠ NEEDS HUMAN CONFIRMATION |
 | Q5 | Flag on but source not `fake`? | Panel hidden | Listed orders would not exist |

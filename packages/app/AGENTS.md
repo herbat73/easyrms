@@ -23,7 +23,7 @@ Components; add `"use client"` only when needed. Keep route handlers thin.
   package there.
 - After changing `packages/core/src/http`, restart `next dev`: route bundles keep the stale `apiHandler`, so a new
   `authenticate` option silently does nothing until you do.
-- Storybook config is in `.storybook/`; stories themselves live in `packages/ui/src/storybook/`. `app` has no test
-  runner yet.
+- Storybook config is in `.storybook/`; stories themselves live in `packages/ui/src/storybook/`. `app` has unit tests
+  (Vitest, `*.test.ts` next to the code, run by the root `npm test`).
 - Build with `NODE_ENV=production npm run build` (a shell with `NODE_ENV=development` fails prerendering
   `/_global-error`).
