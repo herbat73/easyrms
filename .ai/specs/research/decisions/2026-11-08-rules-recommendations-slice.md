@@ -8,7 +8,7 @@
 
 1. **D15 is overridden for this slice only.** The rules engine is wired into the agent's decision card as a recommendation; it decides nothing and mails nothing (R08 stays "not auto-approved").
 2. **Measure, do not automate.** Every approve/reject decision stores what the engine recommended and whether the agent followed it (`return_rule_comparisons`), behind `EASYRMS_RULES_RECOMMENDATIONS` (default off). Followed and disagreed counts per rule are the first real data for A04.
-3. R08/R09 thresholds stay constants (D16). R10a has no live match until a transport kind exists; R10b waits for uploads (R07).
+3. R08/R09 thresholds stay constants (D16). R10a has no live match until a transport kind exists (Update 2026-11-25: it has since PR #139, transport damage); R10b waits for uploads (R07).
 
 ## What this does not establish
 

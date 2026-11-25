@@ -1,6 +1,6 @@
 # Design system with Storybook as the manual
 
-Status: implemented 2026-10-24 (not yet merged). Known gaps found while documenting are listed on the Storybook page "Wprowadzenie/Znane luki"; fixing them is follow-up work.
+Status: implemented 2026-10-24, merged in PR #28. Known gaps found while documenting are listed on the Storybook page "Wprowadzenie/Znane luki"; fixing them is follow-up work.
 
 ## TLDR
 `packages/ui` has 31 components and a story per component, but no *rules*: nothing says which component to pick, how to

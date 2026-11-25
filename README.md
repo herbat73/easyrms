@@ -46,6 +46,8 @@ Copy .env.example file to .env and modify environment settings if needed
 cp .env.example .env
 ```
 
+> ⚠️ `.env.example` turns on `EASYRMS_PRELOAD_TEST_DATA` and `EASYRMS_RESET_TEST_DATA`. The second shows the "Resetuj bazę" button, which deletes **all** data, in any environment and on any database. Fine for local work; remove both before pointing `.env` at a database with real data (see [Configuration.md](./Configuration.md)).
+
 > `@easyrms/app` scripts (`npm run dev`, `build`, `start`, `seed:dev`, etc.) preload variables from the repository root `/.env`, so for local work you can keep config in one place.
 
 generate secretes session values in .eve for

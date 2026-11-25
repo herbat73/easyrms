@@ -3,17 +3,21 @@
 Lets a developer on a local development environment return the database to its seeded state from the admin header.
 
 ## Requirement: Reset button only in a development environment
-The system SHALL show the "Resetuj bazę" button in the admin header only when `NODE_ENV` is `development` and the configured database host is a loopback address, and SHALL answer `POST /api/dev/reset` with 404 in every other case.
+The system SHALL show the "Resetuj bazę" button in the admin header only when `NODE_ENV` is `development` and the configured database host is a loopback address, or when `EASYRMS_RESET_TEST_DATA` is exactly `true` (any environment, any database), and SHALL answer `POST /api/dev/reset` with 404 in every other case.
 
 ### Scenario: Production or remote database
-- WHEN the process runs with `NODE_ENV=production`, or `EASYRMS_DATABASE_URL` points at a non-loopback host
+- WHEN `EASYRMS_RESET_TEST_DATA` is not exactly `true` and the process runs with `NODE_ENV=production`, or `EASYRMS_DATABASE_URL` points at a non-loopback host
 - THEN the admin header has no reset button and `POST /api/dev/reset` returns 404 without touching the database
 
 ### Scenario: Local development
 - WHEN a signed-in agent with `MANAGE_RULES` opens any admin page under `next dev` against the default local database
 - THEN the button is the first item at the left of the header
 
-Source: .ai/specs/implemented/2026-11-19-dev-db-reset.md
+### Scenario: Opt-in on a test deployment
+- WHEN `EASYRMS_RESET_TEST_DATA=true` is set, whatever `NODE_ENV` and the database host are
+- THEN the button is shown and `POST /api/dev/reset` works for an agent with `MANAGE_RULES`
+
+Source: .ai/specs/implemented/2026-11-19-dev-db-reset.md; issue #183 (PR #184)
 
 ## Requirement: Reset needs confirmation and permission
 The system SHALL run the reset only after the agent confirms "Czy chcesz zresetować bazę do pierwotnego stanu developerskiego?" and only for an agent with `MANAGE_RULES`.

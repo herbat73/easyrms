@@ -37,7 +37,7 @@ Other commands:
 ```bash
 npm run lint
 npm run typecheck  # all workspaces
-npm test           # unit tests (Vitest, @easyrms/core)
+npm test           # unit tests (Vitest, @easyrms/core and @easyrms/app)
 npm run test:db    # database tests (Vitest, @easyrms/db): migration and repository against the local Postgres
 npm run test:integration  # all agent-browser QA scenarios from .ai/qa/ (see IntegrationTests.md)
 npm run storybook  # component catalog on http://localhost:6006

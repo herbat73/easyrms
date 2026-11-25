@@ -27,7 +27,7 @@ Applied automatically by `om-code-review` / `om-auto-review-pr`. The full repo c
 
 ## Validation gate
 
-`npm run typecheck`, `npm test`, `npm run lint`, `npm run audit`, `NODE_ENV=production npm run build` must all pass. A failing gate is a blocker finding, reported together with the code findings, not instead of them.
+`npm run typecheck`, `npm test`, `npm run lint`, `npm run audit`, `npm run docs:check`, `npm run storybook:build`, `NODE_ENV=production npm run build` must all pass (the list in `.ai/agentic.config.json`). A failing gate is a blocker finding, reported together with the code findings, not instead of them.
 
 ## Severity guidance
 

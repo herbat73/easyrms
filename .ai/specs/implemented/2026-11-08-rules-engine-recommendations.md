@@ -43,7 +43,7 @@ Alternatives rejected: (1) fully automatic approval/mail (Q3 = b; one false acce
 - Product category: `OrderLine` (order port) and the stored items carry no category, so `categories` is `[]` and R10b
   can never match; R10b is out of scope anyway (Q7).
 - Live kinds are only `return` and `complaint` (`REQUEST_KINDS`); `transport` and `missing` exist in the engine but not
-  in the app, so **R10a never matches live data** and is deferred until a transport kind exists (still in E04 Later).
+  in the app, so **R10a never matches live data** and is deferred until a transport kind exists (still in E04 Later). (Update 2026-11-25: the transport kind shipped with `2026-11-10-transport-damage-and-missing-items.md`, PR #139; R10a now marks every `transport` request as high priority, `packages/core/src/services/returns/recommendation.ts`.)
 
 ## 📝 Data Model
 One new table, additive migration in `packages/db` (verified against the code in review, 2026-11-08):
