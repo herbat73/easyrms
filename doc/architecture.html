@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EasyRMS Architecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
+<style>
+/* Layout: one wide schematic in three stacked tiers (frontend → backend → data), notes underneath */
+:root {
+  --bg: #f5f7f8; --panel: #ffffff; --fg: #18232b; --muted: #5a6872; --line: #c9d3d9; --wire: #33444f;
+  --fe: #e3edfa; --fe-ink: #1f5fa8;
+  --be: #fbf0dc; --be-ink: #9a5b07;
+  --db: #e1f3ea; --db-ink: #1d7a4c;
+  --gate: #f6e1e1; --gate-ink: #a33a3a;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11181d; --panel: #18222a; --fg: #e3eaee; --muted: #93a3ad; --line: #2e3c46; --wire: #a9b9c3;
+  --fe: #172b42; --fe-ink: #8dbcf0; --be: #35280f; --be-ink: #f0bf6c; --db: #133126; --db-ink: #7fd3a6;
+  --gate: #3a1c1e; --gate-ink: #f0a0a0; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11181d; --panel: #18222a; --fg: #e3eaee; --muted: #93a3ad; --line: #2e3c46; --wire: #a9b9c3;
+  --fe: #172b42; --fe-ink: #8dbcf0; --be: #35280f; --be-ink: #f0bf6c; --db: #133126; --db-ink: #7fd3a6;
+  --gate: #3a1c1e; --gate-ink: #f0a0a0; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--sans); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 32px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 24px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 600 30px/1.15 var(--cond); margin: 0; text-wrap: balance; }
+header p { margin: 0; color: var(--muted); max-width: 68ch; }
+.diagram { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 880px; height: auto; }
+svg text { font-family: var(--sans); fill: var(--fg); }
+svg .mono { font-family: var(--mono); }
+svg .muted { fill: var(--muted); }
+svg .tier { font: 600 13px var(--cond); letter-spacing: .1em; text-transform: uppercase; }
+svg .h { font-weight: 600; font-size: 15px; }
+svg .s { font-size: 12.5px; }
+svg .xs { font-size: 11.5px; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.notes section { min-width: 0; border-top: 2px solid var(--line); padding-top: 10px; }
+.notes h2 { font: 600 15px var(--cond); letter-spacing: .04em; margin: 0 0 6px; }
+.notes p, .notes ul { margin: 0; color: var(--muted); font-size: 14px; }
+.notes ul { padding-left: 18px; }
+code { font: 13px var(--mono); color: var(--fg); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">npm workspaces · packages/{app, ui, core, db}</span>
+    <h1>EasyRMS architecture</h1>
+    <p>How a return request travels from the customer portal or the agent back office through the Next.js API routes and domain services into PostgreSQL.</p>
+  </header>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1000 800" role="img" aria-label="EasyRMS architecture: frontend, backend and data tiers">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--wire)"/>
+        </marker>
+      </defs>
+
+      <!-- ===== Tier bands ===== -->
+      <rect x="20" y="20" width="960" height="240" rx="4" fill="var(--fe)" opacity=".55"/>
+      <rect x="20" y="300" width="960" height="250" rx="4" fill="var(--be)" opacity=".55"/>
+      <rect x="20" y="590" width="960" height="190" rx="4" fill="var(--db)" opacity=".55"/>
+      <text x="36" y="44" class="tier" fill="var(--fe-ink)" style="fill:var(--fe-ink)">Frontend · Next.js 16 App Router, React 19</text>
+      <text x="36" y="324" class="tier" style="fill:var(--be-ink)">Backend · same Next.js process (Node.js)</text>
+      <text x="36" y="614" class="tier" style="fill:var(--db-ink)">Data &amp; infrastructure</text>
+
+      <!-- ===== Frontend ===== -->
+      <!-- Customer -->
+      <rect x="40" y="60" width="300" height="140" rx="4" fill="var(--panel)" stroke="var(--fe-ink)"/>
+      <text x="56" y="86" class="h">Customer portal</text>
+      <text x="56" y="106" class="mono s" style="fill:var(--fe-ink)">app/returns/*</text>
+      <text x="56" y="130" class="s muted">Tailwind + @easyrms/ui/public</text>
+      <text x="56" y="148" class="s muted">new, damage, missing, transport,</text>
+      <text x="56" y="166" class="s muted">complaint, status by RMA</text>
+      <text x="56" y="188" class="xs muted">guest session cookie</text>
+
+      <!-- Agent -->
+      <rect x="640" y="60" width="320" height="140" rx="4" fill="var(--panel)" stroke="var(--fe-ink)"/>
+      <text x="656" y="86" class="h">Agent back office</text>
+      <text x="656" y="106" class="mono s" style="fill:var(--fe-ink)">app/admin/*</text>
+      <text x="656" y="130" class="s muted">shadcn/ui + @easyrms/ui/admin</text>
+      <text x="656" y="148" class="s muted">returns inbox, rules, suppliers,</text>
+      <text x="656" y="166" class="s muted">supplier claims, agents, discovery</text>
+      <text x="656" y="188" class="xs muted">login / invite → agent session</text>
+
+      <!-- shared ui package -->
+      <rect x="370" y="96" width="240" height="68" rx="4" fill="none" stroke="var(--fe-ink)" stroke-dasharray="4 3"/>
+      <text x="490" y="122" text-anchor="middle" class="h" style="font-size:14px">@easyrms/ui</text>
+      <text x="490" y="142" text-anchor="middle" class="xs muted">components + Storybook</text>
+      <text x="490" y="156" text-anchor="middle" class="xs muted">imports nothing internal</text>
+      <line x1="370" y1="130" x2="342" y2="130" stroke="var(--wire)" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+      <line x1="610" y1="130" x2="638" y2="130" stroke="var(--wire)" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+
+      <!-- proxy gate -->
+      <rect x="640" y="226" width="320" height="52" rx="4" fill="var(--gate)" stroke="var(--gate-ink)"/>
+      <text x="656" y="248" class="mono s" style="fill:var(--gate-ink);font-weight:500">proxy.ts</text>
+      <text x="656" y="267" class="xs muted">verifies signed agent token on /admin + agent APIs</text>
+      <line x1="800" y1="200" x2="800" y2="224" stroke="var(--wire)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- ===== Backend ===== -->
+      <!-- API routes -->
+      <rect x="300" y="340" width="660" height="72" rx="4" fill="var(--panel)" stroke="var(--be-ink)"/>
+      <text x="316" y="364" class="h">API routes</text>
+      <text x="408" y="364" class="mono s" style="fill:var(--be-ink)">app/api/*</text>
+      <text x="316" y="384" class="xs muted">thin: parse with Zod, resolve a service, map to the core http envelope</text>
+      <g class="mono xs muted">
+        <text x="316" y="402">returns · evidence · agents · rules · suppliers · supplier-claims · discovery · health</text>
+      </g>
+
+      <!-- Portal -> API -->
+      <line x1="320" y1="200" x2="320" y2="338" stroke="var(--wire)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <rect x="252" y="262" width="64" height="20" rx="3" fill="var(--panel)"/>
+      <text x="312" y="276" text-anchor="end" class="mono xs">apiCall</text>
+      <!-- proxy -> API -->
+      <line x1="800" y1="278" x2="800" y2="338" stroke="var(--wire)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="810" y="312" class="mono xs">apiCall</text>
+      <text x="56" y="232" class="xs muted">mutations + client reads → HTTP</text>
+
+      <!-- Awilix container -->
+      <rect x="40" y="340" width="230" height="190" rx="4" fill="var(--panel)" stroke="var(--be-ink)"/>
+      <text x="56" y="364" class="h">Awilix container</text>
+      <text x="56" y="384" class="mono xs" style="fill:var(--be-ink)">server/container.ts</text>
+      <text x="56" y="408" class="s muted">explicit registration</text>
+      <text x="56" y="426" class="s muted">core/register.ts</text>
+      <text x="56" y="444" class="s muted">db/register.ts</text>
+      <text x="56" y="468" class="xs muted">plus app adapters: mail,</text>
+      <text x="56" y="484" class="xs muted">agent + guest sessions,</text>
+      <text x="56" y="500" class="xs muted">evidence scanner config</text>
+      <!-- RSC reads -->
+      <line x1="120" y1="200" x2="120" y2="338" stroke="var(--wire)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+      <rect x="128" y="276" width="150" height="20" rx="3" fill="var(--panel)"/>
+      <text x="134" y="290" class="xs">Server Component reads</text>
+      <!-- API resolves from container -->
+      <line x1="298" y1="376" x2="272" y2="376" stroke="var(--wire)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Core -->
+      <rect x="300" y="432" width="420" height="98" rx="4" fill="var(--panel)" stroke="var(--be-ink)"/>
+      <text x="316" y="456" class="h">@easyrms/core</text>
+      <text x="430" y="456" class="xs muted">no React, Next.js or MikroORM</text>
+      <text x="316" y="478" class="s muted">services: returns, evidence, rules, suppliers,</text>
+      <text x="316" y="496" class="s muted">supplier claims, agents, mail, orders, retention</text>
+      <text x="316" y="518" class="mono xs" style="fill:var(--be-ink)">Zod validators · state machine · rules engine · i18n</text>
+      <line x1="630" y1="412" x2="630" y2="430" stroke="var(--wire)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="272" y1="480" x2="298" y2="480" stroke="var(--wire)" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+
+      <!-- Ports -->
+      <rect x="740" y="432" width="220" height="98" rx="4" fill="var(--panel)" stroke="var(--be-ink)"/>
+      <text x="756" y="456" class="h">Ports &amp; adapters</text>
+      <text x="756" y="476" class="xs muted">MailPort → log adapter</text>
+      <text x="756" y="492" class="xs muted">OrderLookup → fake lookup</text>
+      <text x="756" y="508" class="xs muted">MalwareScanner → clamd</text>
+      <text x="756" y="524" class="xs muted">image sanitizer → sharp</text>
+      <line x1="720" y1="480" x2="738" y2="480" stroke="var(--wire)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- ===== Data ===== -->
+      <!-- db package -->
+      <rect x="40" y="630" width="500" height="130" rx="4" fill="var(--panel)" stroke="var(--db-ink)"/>
+      <text x="56" y="654" class="h">@easyrms/db</text>
+      <text x="160" y="654" class="mono xs" style="fill:var(--db-ink)">MikroORM 7</text>
+      <text x="56" y="678" class="s muted">repositories: returns, evidence, agents, suppliers,</text>
+      <text x="56" y="696" class="s muted">supplier claims, security (rate limits), retention</text>
+      <text x="56" y="720" class="s muted">entities defined with defineEntity · 14 migrations</text>
+      <text x="56" y="744" class="xs muted">the only package that touches persistence; imports core types only</text>
+      <!-- core -> db -->
+      <line x1="420" y1="530" x2="420" y2="628" stroke="var(--wire)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <rect x="428" y="566" width="150" height="20" rx="3" fill="var(--panel)"/>
+      <text x="434" y="580" class="xs">injected repositories</text>
+
+      <!-- Postgres cylinder -->
+      <g>
+        <path d="M600,650 v96 a75,14 0 0 0 150,0 v-96" fill="var(--panel)" stroke="var(--db-ink)"/>
+        <ellipse cx="675" cy="650" rx="75" ry="14" fill="var(--panel)" stroke="var(--db-ink)"/>
+        <text x="675" y="690" text-anchor="middle" class="h">PostgreSQL 18</text>
+        <text x="675" y="710" text-anchor="middle" class="xs muted">returns, events, agents,</text>
+        <text x="675" y="725" text-anchor="middle" class="xs muted">suppliers, claims, rate limits</text>
+        <text x="675" y="740" text-anchor="middle" class="xs muted">evidence images as bytea</text>
+      </g>
+      <line x1="540" y1="696" x2="598" y2="696" stroke="var(--wire)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="569" y="688" text-anchor="middle" class="mono xs">SQL</text>
+
+      <!-- ClamAV -->
+      <rect x="790" y="640" width="170" height="100" rx="4" fill="var(--panel)" stroke="var(--db-ink)"/>
+      <text x="806" y="664" class="h">ClamAV</text>
+      <text x="806" y="684" class="mono xs" style="fill:var(--db-ink)">clamd container</text>
+      <text x="806" y="706" class="xs muted">scans uploaded evidence</text>
+      <text x="806" y="722" class="xs muted">before it is stored</text>
+      <line x1="875" y1="530" x2="875" y2="638" stroke="var(--wire)" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="883" y="590" class="mono xs">TCP</text>
+    </svg>
+  </div>
+
+  <div class="notes">
+    <section>
+      <h2>Request paths</h2>
+      <p>Pages read through Server Components, which resolve services from the container. Mutations and client-side reads go through <code>apiCall</code> to an API route. There are no Server Actions.</p>
+    </section>
+    <section>
+      <h2>Dependency direction</h2>
+      <p><code>app → ui, core, db</code> and <code>db → core</code> (types only). <code>ui</code> and <code>core</code> import nothing internal. <code>npm run lint</code> enforces this.</p>
+    </section>
+    <section>
+      <h2>Deployment</h2>
+      <p><code>docker-compose.yml</code> runs three containers on one network: the webapp image, <code>postgres:18.7</code> and <code>clamav</code>, with volumes for the database and virus signatures.</p>
+    </section>
+  </div>
+</div>
+</body>
+</html>
