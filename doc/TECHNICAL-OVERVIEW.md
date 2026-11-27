@@ -13,7 +13,8 @@ This page holds the implementation and domain details that used to live in the R
 
 ## Architecture
 
-EasyRMS is a monorepo. Sub-packages live in `packages/`:
+EasyRMS is a monorepo. Sub-packages live in `packages/`. For a visual map of the frontend, backend and data tiers and
+how requests flow between them, open the [architecture diagram](architecture.html) in a browser.
 
 | Package | Responsibility |
 |---|---|
